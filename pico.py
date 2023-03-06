@@ -20,9 +20,9 @@ class Pico:
 
     def update(self):
         if pyxel.btn(pyxel.KEY_RIGHT):
-            self.x = (self.x + 3) % pyxel.width
+            self.x = (self.x + 2) % pyxel.width
         if pyxel.btn(pyxel.KEY_LEFT):
-            self.x = (self.x - 3) % pyxel.width
+            self.x = (self.x - 2) % pyxel.width
 
 
 class Champagne:
@@ -91,6 +91,10 @@ class Game:
         if pyxel.btn(pyxel.KEY_Q):
             logging.warning('Bye bye')
             pyxel.quit()
+
+        if self.broken >= 3:
+            # stop updating if game over
+            return
 
         # update position of Pico
         self.pico.update()
