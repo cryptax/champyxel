@@ -11,12 +11,18 @@ logging.basicConfig(level=logging.DEBUG)
 
 class Pico:
     Y = SCREEN_HEIGHT - 30
+    NORMAL_FACE = 0
+    SMILING_FACE = 1
 
     def __init__(self):
         self.x = 0  # position of Pico
+        self.face = Pico.NORMAL_FACE
 
     def draw(self):
-        pyxel.blt(self.x, y=Pico.Y, img=0, u=16, v=0, w=24, h=16)
+        if self.face == Pico.SMILING_FACE:
+            pyxel.blt(self.x, y=Pico.Y, img=0, u=16, v=0, w=24, h=16)
+        else:
+            pyxel.blt(self.x, y=Pico.Y, img=0, u=16, v=16, w=24, h=16)
 
     def update(self):
         if pyxel.btn(pyxel.KEY_RIGHT):
@@ -28,12 +34,16 @@ class Pico:
 class Champagne:
     def __init__(self, speed=1):
         self.x = random.randint(21, SCREEN_WIDTH-4)
-        self.y = HEADER_HEIGHT + 1
+        self.y = HEADER_HEIGHT + 3 + 1
         self.speed = speed
+        self.broken_framecount = 0
         logging.debug(f'[+] Bottle created at ({self.x}, {self.y})')
 
     def draw(self):
-        pyxel.blt(self.x, y=self.y, img=0, u=0, v=16, w=3, h=8)
+        if self.broken_framecount > 0:
+            pyxel.blt(self.x, y=self.y, img=0, u=8, v=17, w=6, h=6)
+        else:
+            pyxel.blt(self.x, y=self.y, img=0, u=0, v=16, w=3, h=8)
 
     def update(self):
         self.y = (self.y + self.speed) % pyxel.height
@@ -54,6 +64,8 @@ class Game:
         self.simultaneous_bottles = 1
         # frame count value last time a bottle was generated
         self.last_generation = 0
+        # frame count when last bottle caught
+        self.last_catch = 0
 
         pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Pico et le champagne")
         pyxel.load("pico.pyxres", True, False, True, True)
@@ -63,18 +75,19 @@ class Game:
 
     def draw(self):
         pyxel.cls(0)
-        pyxel.text(10, HEADER_HEIGHT,
+        pyxel.text(30, HEADER_HEIGHT,
                    f'CHAMPAGNE={self.in_box} '
                    f'BROKEN={self.broken} ',
-                   pyxel.frame_count % 16)
+                   7)
 
         self.pico.draw()
         for b in self.bottles:
             b.draw()
 
         if self.broken >= 3:
-            pyxel.text(30, SCREEN_HEIGHT//2,
-                       'Game Over', pyxel.frame_count % 16)
+            position = SCREEN_HEIGHT // 2
+            pyxel.text(40, position - 10, '3 broken bottles!!!', 7)
+            pyxel.text(55, position, 'Game Over', 7)
             if pyxel.btn(pyxel.KEY_RETURN):
                 pyxel.quit()
 
@@ -95,6 +108,9 @@ class Game:
         if self.broken >= 3:
             # stop updating if game over
             return
+        
+        if pyxel.frame_count - self.last_catch > 5:
+            self.pico.face = Pico.NORMAL_FACE
 
         # update position of Pico
         self.pico.update()
@@ -116,12 +132,18 @@ class Game:
                 if b.x >= (self.pico.x + 14) and \
                    b.x <= (self.pico.x + 21):
                     self.in_box = self.in_box + 1
+                    self.pico.face = Pico.SMILING_FACE
+                    self.last_catch = pyxel.frame_count
                 else:
                     self.broken = self.broken + 1
-                self.bottles.remove(b)
+                    b.broken_framecount = pyxel.frame_count
             else:
                 # drop bottle
                 b.update()
+            # remove the broken bottles
+            if b.broken_framecount > 0 and \
+               (pyxel.frame_count - b.broken_framecount > 5):
+                self.bottles.remove(b)
 
         self.level()
 
