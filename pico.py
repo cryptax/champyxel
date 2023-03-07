@@ -34,7 +34,7 @@ class Pico:
 class Champagne:
     def __init__(self, speed=1):
         self.x = random.randint(21, SCREEN_WIDTH-4)
-        self.y = HEADER_HEIGHT + 3 + 1
+        self.y = HEADER_HEIGHT + 15
         self.speed = speed
         self.broken_framecount = 0
         logging.debug(f'[+] Bottle created at ({self.x}, {self.y})')
@@ -124,7 +124,8 @@ class Game:
 
         # generate bottles
         if len(self.bottles) < self.simultaneous_bottles and \
-           (pyxel.frame_count - self.last_generation) > 50:
+           ((pyxel.frame_count -
+             self.last_generation) > 50 or len(self.bottles) == 0):
             logging.debug(f'bottles={len(self.bottles)} '
                           f'target={self.simultaneous_bottles}')
             self.bottles.append(Champagne(self.speed))
