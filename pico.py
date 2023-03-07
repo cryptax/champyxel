@@ -26,9 +26,9 @@ class Pico:
 
     def update(self):
         if pyxel.btn(pyxel.KEY_RIGHT):
-            self.x = (self.x + 2) % pyxel.width
+            self.x = (self.x + 3) % pyxel.width
         if pyxel.btn(pyxel.KEY_LEFT):
-            self.x = (self.x - 2) % pyxel.width
+            self.x = (self.x - 3) % pyxel.width
 
 
 class Champagne:
@@ -37,7 +37,8 @@ class Champagne:
         self.y = HEADER_HEIGHT + 15
         self.speed = speed
         self.broken_framecount = 0
-        logging.debug(f'[+] Bottle created at ({self.x}, {self.y})')
+        logging.debug(f'[+] Bottle created at ({self.x}, {self.y})'
+                      f' with speed={self.speed}')
 
     def draw(self):
         if self.broken_framecount > 0:
@@ -72,6 +73,8 @@ class Game:
         self.last_generation = 0
         # frame count when last bottle caught
         self.last_catch = 0
+        # last nb of simultaneous bottles we increased level for
+        self.level_up = 0
 
         pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Pico et le champagne")
         pyxel.load("pico.pyxres", True, False, True, True)
@@ -100,10 +103,13 @@ class Game:
     def level(self):
         if self.in_box > 0:
             self.simultaneous_bottles = (self.in_box // 3) + 1
-            if self.simultaneous_bottles % 5 == 0:
+            if self.simultaneous_bottles % 5 == 0 and \
+               self.level_up < self.simultaneous_bottles:
                 self.speed = self.speed + 1
+                self.level_up = self.simultaneous_bottles
                 logging.debug(f'level up: in box={self.in_box} '
-                              f' speed={self.speed} '
+                              f' level={self.level_up}'
+                              f' speed={self.speed}'
                               f' nb_bottles={self.simultaneous_bottles}')
 
     def update(self):
@@ -137,7 +143,7 @@ class Game:
                               f' pico={self.pico.x}'
                               f' frame_count={pyxel.frame_count}')
                 # catch / brake bottles
-                if b.x >= (self.pico.x + 14) and \
+                if b.x >= (self.pico.x + 13) and \
                    b.x <= (self.pico.x + 21):
                     self.in_box = self.in_box + 1
                     self.pico.face = Pico.SMILING_FACE
