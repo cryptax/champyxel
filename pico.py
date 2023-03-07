@@ -75,15 +75,17 @@ class Game:
         self.last_catch = 0
         # last nb of simultaneous bottles we increased level for
         self.level_up = 0
+        # game is paused
+        self.pause = False
 
         pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Pico et le champagne")
         pyxel.load("pico.pyxres", True, False, True, True)
         logging.debug('[+] init done')
-        # pyxel.playm(0, loop=True)
         pyxel.run(self.update, self.draw)
 
     def draw(self):
         pyxel.cls(0)
+        # brown background: pyxel.rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 4)
         pyxel.text(30, HEADER_HEIGHT,
                    f'CHAMPAGNE={self.in_box} '
                    f'BROKEN={self.broken} ',
@@ -99,6 +101,13 @@ class Game:
             pyxel.text(55, position, 'Game Over', 7)
             if pyxel.btn(pyxel.KEY_RETURN):
                 pyxel.quit()
+
+        if self.pause:
+            position = SCREEN_HEIGHT // 2
+            pyxel.text(50, position - 10, 'Game is paused', 7)
+            pyxel.text(45, position, 'ENTER to un-pause', 7)
+            if pyxel.btn(pyxel.KEY_RETURN):
+                self.pause = False
 
     def level(self):
         if self.in_box > 0:
@@ -117,7 +126,11 @@ class Game:
             logging.warning('Bye bye')
             pyxel.quit()
 
-        if self.broken >= 3:
+        if pyxel.btn(pyxel.KEY_P) and not self.pause:
+            logging.info('Game is paused')
+            self.pause = True
+
+        if self.broken >= 3 or self.pause:
             # stop updating if game over
             return
 
@@ -136,6 +149,7 @@ class Game:
                           f'target={self.simultaneous_bottles}')
             self.bottles.append(Champagne(self.speed))
             self.last_generation = pyxel.frame_count
+            pyxel.play(0, 4)
 
         for b in self.bottles:
             if b.y >= Pico.Y:
@@ -149,10 +163,12 @@ class Game:
                     self.pico.face = Pico.SMILING_FACE
                     self.last_catch = pyxel.frame_count
                     self.bottles.remove(b)  # remove the bottle Pico caught
+                    # pyxel.play(0, 2)
                 else:
                     if b.broken_framecount == 0:
                         self.broken = self.broken + 1
                         b.miss()
+                        pyxel.play(0, 3)
                     # else: bottle is not yet removed but already broken
             else:
                 # drop bottle
