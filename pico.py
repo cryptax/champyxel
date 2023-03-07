@@ -19,7 +19,7 @@ class Pico:
         self.face = Pico.NORMAL_FACE
 
     def draw(self):
-        if self.face == Pico.SMILING_FACE:
+        if self.face == Pico.NORMAL_FACE:
             pyxel.blt(self.x, y=Pico.Y, img=0, u=16, v=0, w=24, h=16)
         else:
             pyxel.blt(self.x, y=Pico.Y, img=0, u=16, v=16, w=24, h=16)
@@ -47,6 +47,12 @@ class Champagne:
 
     def update(self):
         self.y = (self.y + self.speed) % pyxel.height
+
+    def miss(self):
+        # call this the first time a bottle is broken
+        self.broken_framecount = pyxel.frame_count
+        # bottles break on the floor, this is an adjustment
+        self.y = self.y + 10
 
 
 class Game:
@@ -108,8 +114,9 @@ class Game:
         if self.broken >= 3:
             # stop updating if game over
             return
-        
-        if pyxel.frame_count - self.last_catch > 5:
+
+        if pyxel.frame_count - self.last_catch > 10:
+            # Pico has smiled for his success long enough
             self.pico.face = Pico.NORMAL_FACE
 
         # update position of Pico
@@ -134,12 +141,16 @@ class Game:
                     self.in_box = self.in_box + 1
                     self.pico.face = Pico.SMILING_FACE
                     self.last_catch = pyxel.frame_count
+                    self.bottles.remove(b)  # remove the bottle Pico caught
                 else:
-                    self.broken = self.broken + 1
-                    b.broken_framecount = pyxel.frame_count
+                    if b.broken_framecount == 0:
+                        self.broken = self.broken + 1
+                        b.miss()
+                    # else: bottle is not yet removed but already broken
             else:
                 # drop bottle
                 b.update()
+
             # remove the broken bottles
             if b.broken_framecount > 0 and \
                (pyxel.frame_count - b.broken_framecount > 5):
