@@ -83,8 +83,24 @@ class Game:
         logging.debug('[+] init done')
         pyxel.run(self.update, self.draw)
 
+    def welcome(self):
+        # welcome screen
+        position = SCREEN_HEIGHT // 2
+        # tete de Pico
+        pyxel.blt(40, position-10, 1, 0, 0, 34, 24)
+        # bouteille de champagne
+        pyxel.blt(100, position, 1, 5, 30, 5, 18)
+        # text
+        pyxel.text(50, position+20, 'PICO', 3)
+        pyxel.text(50, position+30, 'range son', 3)
+        pyxel.text(50, position+40, 'Champagne', 3)
+
     def draw(self):
         pyxel.cls(0)
+        if pyxel.frame_count < 100:
+            self.welcome()
+            return
+        
         # brown background: pyxel.rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 4)
         pyxel.text(30, HEADER_HEIGHT,
                    f'CHAMPAGNE={self.in_box} '
@@ -130,7 +146,7 @@ class Game:
             logging.info('Game is paused')
             self.pause = True
 
-        if self.broken >= 3 or self.pause:
+        if self.broken >= 3 or self.pause or pyxel.frame_count < 100:
             # stop updating if game over
             return
 
