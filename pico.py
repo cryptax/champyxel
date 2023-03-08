@@ -2,8 +2,8 @@ import pyxel
 import logging
 import random
 
-SCREEN_WIDTH = 160
-SCREEN_HEIGHT = 200
+SCREEN_WIDTH = 180
+SCREEN_HEIGHT = 180
 HEADER_HEIGHT = 10
 
 logging.basicConfig(level=logging.DEBUG)
@@ -13,6 +13,8 @@ class Pico:
     Y = SCREEN_HEIGHT - 30
     NORMAL_FACE = 0
     SMILING_FACE = 1
+    SPRITE_WIDTH = 43
+    SPRITE_HEIGHT = 27
 
     def __init__(self):
         self.x = 0  # position of Pico
@@ -20,9 +22,11 @@ class Pico:
 
     def draw(self):
         if self.face == Pico.NORMAL_FACE:
-            pyxel.blt(self.x, y=Pico.Y, img=0, u=0, v=32, w=43, h=27)
+            pyxel.blt(self.x, y=Pico.Y, img=0, u=0, v=32,
+                      w=Pico.SPRITE_WIDTH, h=Pico.SPRITE_HEIGHT)
         else:
-            pyxel.blt(self.x, y=Pico.Y, img=0, u=0, v=80, w=43, h=27)
+            pyxel.blt(self.x, y=Pico.Y, img=0, u=0, v=80,
+                      w=Pico.SPRITE_WIDTH, h=Pico.SPRITE_HEIGHT)
 
     def update(self):
         if pyxel.btn(pyxel.KEY_RIGHT):
@@ -33,7 +37,7 @@ class Pico:
 
 class Champagne:
     def __init__(self, speed=1):
-        self.x = random.randint(21, SCREEN_WIDTH-4)
+        self.x = random.randint(Pico.SPRITE_WIDTH+1, SCREEN_WIDTH-4)
         self.y = HEADER_HEIGHT + 15
         self.speed = speed
         self.broken_framecount = 0
@@ -95,6 +99,19 @@ class Game:
         pyxel.text(50, position+30, 'range son', 3)
         pyxel.text(50, position+40, 'Champagne', 3)
 
+    def level(self):
+        if self.in_box > 0:
+            # every 3 boxes, we add a bottle
+            self.simultaneous_bottles = (self.in_box // 3) + 1
+            if self.simultaneous_bottles % 10 == 0 and \
+               self.level_up < self.simultaneous_bottles:
+                self.speed = self.speed + 1
+                self.level_up = self.simultaneous_bottles
+                logging.debug(f'level up: in box={self.in_box} '
+                              f' level={self.level_up}'
+                              f' speed={self.speed}'
+                              f' nb_bottles={self.simultaneous_bottles}')
+
     def draw(self):
         pyxel.cls(0)
         if pyxel.frame_count < 100:
@@ -102,7 +119,7 @@ class Game:
             return
         
         # brown background: pyxel.rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 4)
-        pyxel.text(30, HEADER_HEIGHT,
+        pyxel.text(25, HEADER_HEIGHT,
                    f'CHAMPAGNE={self.in_box} '
                    f'BROKEN={self.broken} '
                    f'LEVEL={self.speed}',
@@ -126,17 +143,6 @@ class Game:
             if pyxel.btn(pyxel.KEY_RETURN):
                 self.pause = False
 
-    def level(self):
-        if self.in_box > 0:
-            self.simultaneous_bottles = (self.in_box // 3) + 1
-            if self.simultaneous_bottles % 5 == 0 and \
-               self.level_up < self.simultaneous_bottles:
-                self.speed = self.speed + 1
-                self.level_up = self.simultaneous_bottles
-                logging.debug(f'level up: in box={self.in_box} '
-                              f' level={self.level_up}'
-                              f' speed={self.speed}'
-                              f' nb_bottles={self.simultaneous_bottles}')
 
     def update(self):
         if pyxel.btn(pyxel.KEY_Q):
@@ -174,10 +180,10 @@ class Game:
                               f' pico={self.pico.x}'
                               f' frame_count={pyxel.frame_count}')
                 # catch / brake bottles
-                # offset box: [ 26 - 38 ]
+                # offset box: [ 26 - 42 ]
                 # bottle width: 5
                 if b.x >= (self.pico.x + 26) and \
-                   b.x <= (self.pico.x + 38 - 5):
+                   b.x <= (self.pico.x + 42 - 5):
                     self.in_box = self.in_box + 1
                     self.pico.face = Pico.SMILING_FACE
                     self.last_catch = pyxel.frame_count
