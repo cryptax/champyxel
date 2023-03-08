@@ -20,9 +20,9 @@ class Pico:
 
     def draw(self):
         if self.face == Pico.NORMAL_FACE:
-            pyxel.blt(self.x, y=Pico.Y, img=0, u=16, v=0, w=24, h=16)
+            pyxel.blt(self.x, y=Pico.Y, img=0, u=0, v=32, w=43, h=27)
         else:
-            pyxel.blt(self.x, y=Pico.Y, img=0, u=16, v=16, w=24, h=16)
+            pyxel.blt(self.x, y=Pico.Y, img=0, u=0, v=80, w=43, h=27)
 
     def update(self):
         if pyxel.btn(pyxel.KEY_RIGHT):
@@ -42,9 +42,9 @@ class Champagne:
 
     def draw(self):
         if self.broken_framecount > 0:
-            pyxel.blt(self.x, y=self.y, img=0, u=8, v=17, w=6, h=6)
+            pyxel.blt(self.x, y=self.y, img=0, u=8, v=66, w=8, h=14)
         else:
-            pyxel.blt(self.x, y=self.y, img=0, u=0, v=16, w=3, h=8)
+            pyxel.blt(self.x, y=self.y, img=0, u=0, v=63, w=5, h=17)
 
     def update(self):
         self.y = (self.y + self.speed) % pyxel.height
@@ -104,7 +104,8 @@ class Game:
         # brown background: pyxel.rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 4)
         pyxel.text(30, HEADER_HEIGHT,
                    f'CHAMPAGNE={self.in_box} '
-                   f'BROKEN={self.broken} ',
+                   f'BROKEN={self.broken} '
+                   f'LEVEL={self.speed}',
                    7)
 
         self.pico.draw()
@@ -173,8 +174,10 @@ class Game:
                               f' pico={self.pico.x}'
                               f' frame_count={pyxel.frame_count}')
                 # catch / brake bottles
-                if b.x >= (self.pico.x + 13) and \
-                   b.x <= (self.pico.x + 21):
+                # offset box: [ 26 - 38 ]
+                # bottle width: 5
+                if b.x >= (self.pico.x + 26) and \
+                   b.x <= (self.pico.x + 38 - 5):
                     self.in_box = self.in_box + 1
                     self.pico.face = Pico.SMILING_FACE
                     self.last_catch = pyxel.frame_count
