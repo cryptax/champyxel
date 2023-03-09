@@ -8,4 +8,4 @@ champyxel.pyxapp: ../pico.py ../pico.pyxres
 	rm -f pico.py pico.pyxres
 
 clean:
-	rm -f pico.py pico.pyxres champyxel.pyxapp
+	rm -f pico.py pico.pyxres champyxel.pyxapp champyxel.html

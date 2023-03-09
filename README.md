@@ -3,4 +3,4 @@ A [pyxel](https://github.com/kitao/pyxel) game, with Pico le Croco, catching bot
 ![Playing the Game](./images/game.gif)
 
 [To play the game online](https://kitao.github.io/pyxel/wasm/launcher/?run=cryptax.champyxel.pico)
-[To play the game in a webpage](./build/champyxel.html)
+
