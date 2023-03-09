@@ -81,6 +81,8 @@ class Game:
         self.level_up = 0
         # game is paused
         self.pause = False
+        # frame count when the game was paused
+        self.pause_frame = 0
 
         pyxel.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Pico et le champagne")
         pyxel.load("pico.pyxres", True, False, True, True)
@@ -90,29 +92,38 @@ class Game:
     def welcome(self):
         # welcome screen
         position = SCREEN_HEIGHT // 2
+        # rectangle borders
+        pyxel.rectb(2, 2, SCREEN_WIDTH-4, SCREEN_HEIGHT-4, 10)
+        pyxel.rectb(3, 3, SCREEN_WIDTH-6, SCREEN_HEIGHT-6, 9)
+        # title
+        pyxel.blt(61, 20, img=0, u=16, v=64, w=70-16, h=8)
         # tete de Pico
-        pyxel.blt(40, position-10, 1, 0, 0, 34, 24)
+        pyxel.blt(65, position-35, 1, 0, 0, 34, 24)
         # bouteille de champagne
-        pyxel.blt(100, position, 1, 5, 30, 5, 18)
+        pyxel.blt(110, position-30, 1, 5, 30, 5, 18)
         # text
-        pyxel.text(50, position+20, 'PICO', 3)
-        pyxel.text(50, position+30, 'range son', 3)
-        pyxel.text(50, position+40, 'Champagne', 3)
+        pyxel.text(62, position+20, 'Pico le Croco', 3)
+        pyxel.text(70, position+30, 'range son', 3)
+        pyxel.text(70, position+40, 'Champagne', 3)
+        # how to
+        pyxel.text(25, position+60, 'Utilisez les fleches de GAUCHE', 10)
+        pyxel.text(25, position+70, 'et de DROITE pour deplacer Pico', 10)
 
     def background(self):
         pyxel.rect(0, 0, w=SCREEN_WIDTH, h=SCREEN_HEIGHT, col=10)
         horizon = int(SCREEN_HEIGHT * 0.7)
         # sun
         pyxel.blt(SCREEN_WIDTH-40, 30, img=1, u=0, v=104, w=16, h=16)
-        # trees
-        pyxel.blt(5, horizon, img=1, u=0, v=88, w=16, h=16)
-        pyxel.blt(SCREEN_WIDTH-50, horizon+4, img=1, u=0, v=88, w=16, h=16)
-        pyxel.blt(SCREEN_WIDTH-40, horizon-1, img=1, u=0, v=88, w=16, h=16)
-        pyxel.blt(SCREEN_WIDTH-20, horizon+2, img=1, u=0, v=88, w=16, h=16)
-        pyxel.blt(SCREEN_WIDTH-10, horizon, img=1, u=0, v=88, w=16, h=16)
         # pyramids
         pyxel.blt(20, horizon, img=1, u=0, v=64, w=48, h=24)
         pyxel.blt(100, horizon-2, img=1, u=0, v=64, w=48, h=24)
+        # trees
+        pyxel.blt(5, horizon, img=1, u=0, v=88, w=16, h=16)
+        pyxel.blt((SCREEN_WIDTH//2)-20, horizon, img=1, u=0, v=88, w=16, h=16)
+        pyxel.blt(SCREEN_WIDTH//2, horizon+4, img=1, u=0, v=88, w=16, h=16)
+        pyxel.blt(SCREEN_WIDTH-20, horizon+2, img=1, u=0, v=88, w=16, h=16)
+        pyxel.blt(SCREEN_WIDTH-10, horizon, img=1, u=0, v=88, w=16, h=16)
+        
 
 
     def level(self):
@@ -130,7 +141,14 @@ class Game:
 
     def draw(self):
         pyxel.cls(0)
-        if pyxel.frame_count < 100:
+        if self.pause:
+            position = SCREEN_HEIGHT // 2
+            pyxel.text(50, position - 10, 'Game is paused', 7)
+            pyxel.text(45, position, 'ENTER to un-pause', 7)
+            if pyxel.btn(pyxel.KEY_RETURN):
+                self.pause = False
+
+        if pyxel.frame_count < 100 or (self.pause and self.pause_frame < 100):
             self.welcome()
             return
         self.background()
@@ -153,13 +171,7 @@ class Game:
             if pyxel.btn(pyxel.KEY_RETURN):
                 pyxel.quit()
 
-        if self.pause:
-            position = SCREEN_HEIGHT // 2
-            pyxel.text(50, position - 10, 'Game is paused', 7)
-            pyxel.text(45, position, 'ENTER to un-pause', 7)
-            if pyxel.btn(pyxel.KEY_RETURN):
-                self.pause = False
-
+        
 
     def update(self):
         if pyxel.btn(pyxel.KEY_Q):
@@ -169,6 +181,7 @@ class Game:
         if pyxel.btn(pyxel.KEY_P) and not self.pause:
             logging.info('Game is paused')
             self.pause = True
+            self.pause_frame = pyxel.frame_count
 
         if self.broken >= 3 or self.pause or pyxel.frame_count < 100:
             # stop updating if game over
