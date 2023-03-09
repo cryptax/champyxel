@@ -89,6 +89,13 @@ class Game:
         logging.debug('[+] init done')
         pyxel.run(self.update, self.draw)
 
+    def start_music(self):
+        pyxel.playm(0, 0, True)
+
+    def stop_music(self):
+        pyxel.stop(0)
+        pyxel.stop(1)
+
     def welcome(self):
         # welcome screen
         position = SCREEN_HEIGHT // 2
@@ -123,7 +130,6 @@ class Game:
         pyxel.blt(SCREEN_WIDTH//2, horizon+4, img=1, u=0, v=88, w=16, h=16)
         pyxel.blt(SCREEN_WIDTH-20, horizon+2, img=1, u=0, v=88, w=16, h=16)
         pyxel.blt(SCREEN_WIDTH-10, horizon, img=1, u=0, v=88, w=16, h=16)
-        
 
 
     def level(self):
@@ -147,10 +153,16 @@ class Game:
             pyxel.text(45, position, 'ENTER to un-pause', 7)
             if pyxel.btn(pyxel.KEY_RETURN):
                 self.pause = False
+                self.start_music()
 
         if pyxel.frame_count < 100 or (self.pause and self.pause_frame < 100):
+            self.stop_music()
             self.welcome()
             return
+        
+        if pyxel.frame_count == 100:
+            self.start_music()
+            
         self.background()
         
         # brown background: pyxel.rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 4)
@@ -171,7 +183,6 @@ class Game:
             if pyxel.btn(pyxel.KEY_RETURN):
                 pyxel.quit()
 
-        
 
     def update(self):
         if pyxel.btn(pyxel.KEY_Q):
@@ -182,6 +193,8 @@ class Game:
             logging.info('Game is paused')
             self.pause = True
             self.pause_frame = pyxel.frame_count
+            pyxel.stop(1)
+            pyxel.stop(0)
 
         if self.broken >= 3 or self.pause or pyxel.frame_count < 100:
             # stop updating if game over
