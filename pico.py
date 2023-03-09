@@ -99,6 +99,22 @@ class Game:
         pyxel.text(50, position+30, 'range son', 3)
         pyxel.text(50, position+40, 'Champagne', 3)
 
+    def background(self):
+        pyxel.rect(0, 0, w=SCREEN_WIDTH, h=SCREEN_HEIGHT, col=10)
+        horizon = int(SCREEN_HEIGHT * 0.7)
+        # sun
+        pyxel.blt(SCREEN_WIDTH-40, 30, img=1, u=0, v=104, w=16, h=16)
+        # trees
+        pyxel.blt(5, horizon, img=1, u=0, v=88, w=16, h=16)
+        pyxel.blt(SCREEN_WIDTH-50, horizon+4, img=1, u=0, v=88, w=16, h=16)
+        pyxel.blt(SCREEN_WIDTH-40, horizon-1, img=1, u=0, v=88, w=16, h=16)
+        pyxel.blt(SCREEN_WIDTH-20, horizon+2, img=1, u=0, v=88, w=16, h=16)
+        pyxel.blt(SCREEN_WIDTH-10, horizon, img=1, u=0, v=88, w=16, h=16)
+        # pyramids
+        pyxel.blt(20, horizon, img=1, u=0, v=64, w=48, h=24)
+        pyxel.blt(100, horizon-2, img=1, u=0, v=64, w=48, h=24)
+
+
     def level(self):
         if self.in_box > 0:
             # every 3 boxes, we add a bottle
@@ -117,6 +133,7 @@ class Game:
         if pyxel.frame_count < 100:
             self.welcome()
             return
+        self.background()
         
         # brown background: pyxel.rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 4)
         pyxel.text(25, HEADER_HEIGHT,
