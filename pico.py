@@ -13,7 +13,7 @@ class Pico:
     Y = SCREEN_HEIGHT - 30
     NORMAL_FACE = 0
     SMILING_FACE = 1
-    SPRITE_WIDTH = 43
+    SPRITE_WIDTH = 49
     SPRITE_HEIGHT = 27
 
     def __init__(self):
@@ -22,10 +22,10 @@ class Pico:
 
     def draw(self):
         if self.face == Pico.NORMAL_FACE:
-            pyxel.blt(self.x, y=Pico.Y, img=0, u=0, v=32,
+            pyxel.blt(self.x, y=Pico.Y, img=0, u=0, v=0,
                       w=Pico.SPRITE_WIDTH, h=Pico.SPRITE_HEIGHT)
         else:
-            pyxel.blt(self.x, y=Pico.Y, img=0, u=0, v=80,
+            pyxel.blt(self.x, y=Pico.Y, img=0, u=0, v=32,
                       w=Pico.SPRITE_WIDTH, h=Pico.SPRITE_HEIGHT)
 
     def update(self):
@@ -177,7 +177,7 @@ class Game:
         for b in self.bottles:
             if b.y >= Pico.Y:
                 logging.debug(f'CATCH ZONE: bottle=({b.x}, {b.y})'
-                              f' pico={self.pico.x}'
+                              f' pico catch=[{self.pico.x+26}-{self.pico.x+42-5}]'
                               f' frame_count={pyxel.frame_count}')
                 # catch / brake bottles
                 # offset box: [ 26 - 42 ]
